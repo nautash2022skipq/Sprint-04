@@ -3,11 +3,15 @@ import os
 
 import aws_cdk as cdk
 
-from nautash_ahmad.nautash_ahmad_stack import NautashAhmadStack
+from nautash_ahmad.nautash_ahmad_pipeline_stack import NautashAhmadPipelineStack
 
 
 app = cdk.App()
-NautashAhmadStack(app, "NautashAhmadStack",
+
+cdk.Tags.of(app).add("cohort", "Eagle")
+cdk.Tags.of(app).add("name", "NautashAhmad")
+
+NautashAhmadPipelineStack(app, "NautashAhmadPipelineStack",
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.
@@ -20,7 +24,7 @@ NautashAhmadStack(app, "NautashAhmadStack",
     # Uncomment the next line if you know exactly what Account and Region you
     # want to deploy the stack to. */
 
-    #env=cdk.Environment(account='123456789012', region='us-east-1'),
+    env=cdk.Environment(account='315997497220', region='us-east-2'),
 
     # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
     )
