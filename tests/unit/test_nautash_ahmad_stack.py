@@ -29,9 +29,9 @@ def test_have_two_lambdas(stack_template):
 def test_has_lambda_s3key_prop(stack_template):
     template = stack_template
     template.has_resource_properties("AWS::Lambda::Function", props={
-        'Code': {
-            'S3Key': 'c44e8fda818c98d5b38d43e7adf10e61da797c611e92efca87b11845b5d4e343.zip'
-        }
+        'Handler': 'WebHealthAppLambda.lambda_handler',
+        'Runtime': 'python3.8',
+        'Timeout': 120
     })
     
     
