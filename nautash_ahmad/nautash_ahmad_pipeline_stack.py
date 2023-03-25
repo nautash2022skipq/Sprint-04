@@ -43,5 +43,20 @@ class NautashAhmadPipelineStack(Stack):
         staging = NautashAhmadPipelineStage(self, 'Staging')
         production = NautashAhmadPipelineStage(self, 'Production')
         
-        pipeline.add_stage(staging)
-        pipeline.add_stage(production)
+        # Adding pre and post steps to pipeline stages
+        # https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.pipelines/AddStageOpts.html
+        
+        # Running test cases
+        pipeline.add_stage(staging, post=[
+            pipelines.ShellStep('StagingPipelineRunTestCases', commands=[
+                'npm install -g aws-cdk',
+                'pip install -r requirements.txt',
+                'pip install -r requirements-dev.txt',
+                'pytest'
+            ])
+        ])
+        
+        # Adding manual approval
+        pipeline.add_stage(production, pre=[
+            pipelines.ManualApprovalStep('ProductionPipelineManualApproval')
+        ])
