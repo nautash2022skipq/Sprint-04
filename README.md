@@ -1,18 +1,15 @@
 
-# Welcome to your CDK Python project!
+# CI/CD Pipeline for a Web Health App Project!
 
-This is a blank project for CDK development with Python.
+This is project which get the metrics of a website **latency** and **availability** and notify users and write data to databse when certain metric reaches a threshold value.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+The AWS Pipeline will be be used to create CI/CD to automate integrating and deploying new changes to the project.
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+## Seting up the Project
 
-To manually create a virtualenv on MacOS and Linux:
+To start with the project:
+
+Create a virtualenv on MacOS and Linux:
 
 ```
 $ python3 -m venv .venv
@@ -43,9 +40,49 @@ At this point you can now synthesize the CloudFormation template for this code.
 $ cdk synth
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+Finally, to deploy your stack to AWS.
+
+```
+$ cdk deploy
+```
+
+And if you have multiple AWS account configured then you need to pass the `--profile` parameter.
+
+```
+$ cdk deploy <PipelineStackName> --profile username
+```
+
+## AWS services used in this project
+
+This project requires follwing services to run
+
+- AWS Lambda
+- IAM Role
+- CloudWatch alarms and metrics
+- SNS
+- Amazon DynamoDB
+- CloudFormation
+- EventBridge scheduler
+- CodeBuild
+
+## Project Flow
+A **Lambda** is used to get metrics of a website which will be run after every 60 mins defined by the **EventBridge** scheduler rule.
+
+The Lambda wil send metrics to **CloudWatch** and the alarms are set in the CloudWatch. When the metric will reach a certain threshold, it will trigger the **SNS**.
+
+The SNS will send notification to users and and will trigger another **Lambda** which will write metrics data to **DynamoDB** table.
+
+The pipeline will be used to deploy the infrasture required for this project in the AWS Cloud.
+
+## Application Architecture Diagrams
+Web health app architecture diagram
+![Web Health App Architecture Diagram](public/imgs/WebHealthAppArchitectureDiagram.png)
+
+CI/CD Pipeline Structure Diagram
+![CI/CD Pipeline Structure Diagram](public/imgs/CICDPipelineStructureDiagram.png)
+
+AWS CodePipeline Flow Diagram
+![AWS CodePipeline Flow Diagram](public/imgs/CodePipelineFlowDiagram.png)
 
 ## Useful commands
 
@@ -54,5 +91,3 @@ command.
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
-
-Enjoy!
