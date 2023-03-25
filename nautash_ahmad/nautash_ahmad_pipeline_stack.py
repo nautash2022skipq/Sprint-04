@@ -15,7 +15,7 @@ class NautashAhmadPipelineStack(Stack):
         # Creating a source step for pipeline
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.pipelines/CodePipelineSource.html#aws_cdk.pipelines.CodePipelineSource.git_hub
         source = pipelines.CodePipelineSource.git_hub(
-            'nautash2022skipq/Sprint-03', 'master',
+            'nautash2022skipq/Sprint-04', 'master',
             authentication=cdk.SecretValue.secrets_manager("NautashAhmadGithubAccessToken"),
             trigger=pipeline_actions_.GitHubTrigger('POLL')
         )
