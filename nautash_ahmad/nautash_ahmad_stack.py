@@ -9,6 +9,7 @@ from aws_cdk import (
     aws_sns_subscriptions as subscriptions_,
     aws_cloudwatch_actions as cw_actions_,
     aws_dynamodb as dynamo_,
+    aws_codedeploy as codedeploy_,
     Stack,
     RemovalPolicy,
 )
@@ -24,6 +25,44 @@ class NautashAhmadStack(Stack):
         
         fn = self.create_lambda("WebHealthLambda", "./resources", "WebHealthAppLambda.lambda_handler", 
             role, 2
+        )
+        
+        # Adding metrics for lambda to monitor it
+        lambda_duration_metric = fn.metric_duration()
+        lambda_invocation_metric = fn.metric_invocations()
+        lambda_error_metric = fn.metric_errors()
+        
+        # Addding CloudWatch alrams for lambda function to monitor
+        lambda_duration_alarm = self.create_cw_alarm(f'LambdaDurationMetricAlarm', 5, 
+            cw_.ComparisonOperator.GREATER_THAN_THRESHOLD, constants.MINS, 
+            lambda_duration_metric
+        )
+        
+        lambda_invocation_alarm = self.create_cw_alarm(f'LambdaInvocationMetricAlarm', 5, 
+            cw_.ComparisonOperator.GREATER_THAN_THRESHOLD, constants.MINS, 
+            lambda_invocation_metric
+        )
+        
+        lambda_error_alarm = self.create_cw_alarm(f'LambdaErrorMetricAlarm', 3, 
+            cw_.ComparisonOperator.GREATER_THAN_THRESHOLD, constants.MINS, 
+            lambda_error_metric
+        )
+        
+        # Creating alias for deployment configuration. Need to make sure each cdk synthesis produces different version in is each deployment
+        # https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_codedeploy/LambdaDeploymentConfig.html
+        version = fn.current_version
+        alias = lambda_.Alias(self, "LambdaAlias",
+            alias_name="WebHealthLambdaAlias",
+            version=version
+        )
+        
+        # Deployemnt configuration
+        # https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_codedeploy/LambdaDeploymentGroup.html
+        # https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_codedeploy/LambdaDeploymentConfig.html
+        deployment_group = codedeploy_.LambdaDeploymentGroup(self, "WebHealthLambdaDeploymentGroup",
+            alias=alias,
+            deployment_config=codedeploy_.LambdaDeploymentConfig.LINEAR_10_PERCENT_EVERY_10_MINUTES,
+            alarms=[lambda_duration_alarm, lambda_invocation_alarm, lambda_error_alarm]
         )
         
         # Removal policy to automatically delete stateless and stateful resources
